@@ -17,8 +17,15 @@ def dice():
 
     return lastnum
 
+def dicetest(): # Version sin tiempo de espera para el archivo de test
+    for i in range(40):
+        lastnum = random.choice(range(1,7))
+        print(lastnum,end="\r")
 
-def battle(d1):
+    return lastnum
+
+
+def battle(d1): 
     sv, ss = 0, 0
 
     if d1 > 3 and ch1 == '1' or d1 <=3 and ch1 == '2':
@@ -69,6 +76,61 @@ def battle(d1):
 
             print(w.saxonAttack())
             time.sleep(0.1)
+            if w.showStatus() == 'Vikings and Saxons are still in the thick of battle.':
+                print(w.vikingAttack())
+            else:
+                pass
+        print('\n')
+        print(w.showStatus())
+        print('Viking warriors left: '+str(len(w.vikingArmy)),'Saxon soldiers left: '+str(len(w.saxonArmy)))
+
+
+
+def battletest(d1): # Version sin tiempos de espera para el archivo de test
+    sv, ss = 0, 0
+
+    if d1 > 3 and ch1 == '1' or d1 <=3 and ch1 == '2':
+        while w.showStatus() == 'Vikings and Saxons are still in the thick of battle.':
+
+            if sv == 0 and len(w.vikingArmy)<10:
+                print("\n'AAAAAGH!!! FOR THE POWER OF ODIN!' -- Less than 10 vikings remain alive. Their strength rises in 100-200%!\n")
+                sv+=1
+                for j in w.vikingArmy:
+                    j.strength *= 1 + 0.01*random.choice(range(50,100))
+            elif ss == 0 and len(w.saxonArmy)<10:
+                print("\n'Dear fellow brothers, we need your help!' -- Less than 10 saxons remain alive. Up to 15 brothers join the fight!\n")
+                ss+=1
+                for j in range(random.choice(range(5,15))):
+                    w.addSaxon(Saxon(random.choice(range(50,100)),random.choice(range(20,60))))
+            else:
+                pass
+
+            print(w.vikingAttack())
+            if w.showStatus() == 'Vikings and Saxons are still in the thick of battle.':
+                print(w.saxonAttack())
+            else:
+                pass
+        print('\n')
+        print(w.showStatus())
+        print('Viking warriors left: '+str(len(w.vikingArmy)),'Saxon soldiers left: '+str(len(w.saxonArmy)))
+
+    else:
+        while w.showStatus() == 'Vikings and Saxons are still in the thick of battle.':
+
+            if sv == 0 and len(w.vikingArmy)<10:
+                print("\n'AAAAAGH!!! FOR THE POWER OF ODIN!' -- Less than 10 vikings remain alive. Their strength rises in up to 300%!\n")
+                sv+=1
+                for j in w.vikingArmy:
+                    j.strength *= 1 + 0.01*random.choice(range(100,200))
+            elif ss == 0 and len(w.saxonArmy)<10:
+                print("\n'Dear fellow brothers, we need your help!' -- Less than 10 saxons remain alive. Up to 15 brothers join the fight!\n")
+                ss+=1
+                for j in range(random.choice(range(5,15))):
+                    w.addSaxon(Saxon(random.choice(range(50,100)),random.choice(range(20,60))))
+            else:
+                pass
+
+            print(w.saxonAttack())
             if w.showStatus() == 'Vikings and Saxons are still in the thick of battle.':
                 print(w.vikingAttack())
             else:
@@ -144,195 +206,425 @@ w = War()
 print(text[0])
 print(text[1])
 
-ready = input('\nAre you ready?!!!\n1: Yes\n2: No\n')
 
-flag = True
-while flag:
+
+# PARA USUARIO QUE JUEGUE ACTIVAMENTE: -------------------------------------------------------------------------------------------------
+
+if 'test' not in locals() or 'test' not in globals():
+
+
+    ready = input('\nAre you ready?!!!\n1: Yes\n2: No\n')
+
+    flag = True
+    while flag:
+        try:
+            int(ready)
+            flag = False
+        except:
+            ready = input('Oups! It seems you fail to answer as indicated. Try again!')
+
+    if ready == '2': print("\n'WRARG!!! YOU SHOULD HAVE THOUGHT ABOUT THAT BEFORE'-- an angry viking shouts. \n")
+    else: pass
+
+
+
+
+
+    # QUESTIONS AND SIDE CHOICE: -----------------------------------------------------------------------------------------------------------
+
+
+    a = [input(e) for e in q]
+    right_a = ['2','odin','3','2','1','1']
+
+    check = [a[i].lower()==right_a[i] for i in range(len(a))]
+    vscore = sum(check[:3])
+    sxscore = sum(check[3:])
+
+    flag = True
+
+    while flag:
+            if vscore < sxscore: ch1 = '2'
+            elif vscore > sxscore: ch1 = '1'
+            else: ch1 = input('\nWOW! It seems you know the same about both cultures. You get to choose. \
+                            \nWhich army do you want to lead?:\n1: Vikings\n2: Saxons\n')
+            
+            if ch1 == '1': 
+                print("\nvikingChief: 'WROARG! You will guide us to victory!'\n")
+                print("\x1B[3m" + 'You correctly answered ' +str(vscore)+'/3 questions about your people, the Vikings.\
+                \nIt will have an influence on their initial health and strength..\n' + "\x1B[0m")
+                score = vscore
+                flag = False
+            elif ch1 == '2': 
+                print("\nsaxonsChief: 'We will bring you the glory, my lord.'\n")
+                print("\x1B[3m" + 'You correctly answered ' +str(sxscore)+'/3 questions about your people, the Saxons.\
+                \nIt will have an influence on their initial health and strength..\n' + "\x1B[0m")
+                score = sxscore
+                flag = False
+            else: 
+                print('You must really choose a side now...')
+
+
+
+
+
+
+    # ARMY CREATION: ----------------------------------------------------------------------------------------------------------------------
+
+
+
+    attackrange = {0:30,1:50,2:80,3:100}
+    healthrange = {0:200,1:250,2:280,3:300}
+
+
+    cter=0
+
+    if ch1 == '1':
+
+        for i in range(30):
+            w.addViking(Viking(viking_names[i],random.choice(range(healthrange[score]-20,healthrange[score]+20)),random.choice(range(attackrange[score]-20,attackrange[score]))))
+            w.addSaxon(Saxon(healthrange[2],attackrange[2]))
+            
+        print('%20s %42s' % ('Your Army',"The enemys' Army"))
+        for i in range(30):
+            cter+=1
+            print('%-12s %-10s %-15s %-12s %-10s %-10s' % (str(w.vikingArmy[i].name),'h: '+str(w.vikingArmy[i].health),'s: '+str(w.vikingArmy[i].strength),'Saxon '+str(cter),'h: '+str(w.saxonArmy[i].health),'s: '+str(w.saxonArmy[i].strength)))
+
+    elif ch1 == '2':
+        
+        for i in range(30):
+            w.addViking(Viking(viking_names[i],healthrange[2],attackrange[2]))
+            w.addSaxon(Saxon(random.choice(range(healthrange[score]-20,healthrange[score]+20)),random.choice(range(attackrange[score]-20,attackrange[score]))))
+        
+        print('%20s %42s' % ('Your Army',"The enemys' Army"))
+        for i in range(30):
+            cter+=1
+            print('%-12s %-10s %-15s %-12s %-10s %-10s' % ('Saxon '+str(cter),'h: '+str(w.saxonArmy[i].health),'s: '+str(w.saxonArmy[i].strength),str(w.vikingArmy[i].name),'h: '+str(w.vikingArmy[i].health),'s: '+str(w.vikingArmy[i].strength)))
+
+    else:
+        pass
+
+
+
+
+
+    # BATTLE 1: ---------------------------------------------------------------------------------------------------------------------------
+
+
+    battle1=input("\nThe first battle is about to start.\
+                \nPress enter to roll a dice, the first attack will be yours if you get a nunber higher than 3.\n")
+    d1 = dice()
+    print('\n')
+
+    battle(d1)
+
+    if ch1 == '1' and w.showStatus() == 'Vikings have won the war of the century!' or ch1 == '2' and w.showStatus() == 'Saxons have fought for their lives and survive another day...':
+        ent2 = input(text[2])
+        vict = 1
+    else:
+        ent2 = input(text[3])
+        vict = 0
+
+
+
+
+
+    # SECOND ARMY CREATION: ------------------------------------------------------------------------------------------------------------------
+
+
+    if ch1 == '1' and vict == 1 or ch1 == '2' and vict ==0:
+            
+        for i in range(random.choice(range(5,20))):
+            w.addSaxon(Saxon(random.choice(range(50,200)),random.choice(range(30,100))))
+
+    else:
+
+        for i in range(random.choice(range(5,20))):
+            w.addViking(Viking(random.choice(viking_names),random.choice(range(50,200)),random.choice(range(30,100))))
+
+    if ch1 == '2':
+        print('%20s %42s' % ('Your Army',"The enemys' Army"))
+
+    else:
+        print('%20s %52s' % ("The enemys' Army",'Your Army'))
+    vks = len(w.vikingArmy)
+    sxs = len(w.saxonArmy)
+
+    cter = 0
+    if vks < sxs:
+        for i in range(vks):
+            cter+=1
+            print('%-12s %-25s %-15s %-12s %-10s %-10s' % ('Saxon '+str(cter),'h: '+str(w.saxonArmy[i].health),'s: '+str(w.saxonArmy[i].strength),str(w.vikingArmy[i].name),'h: '+str(w.vikingArmy[i].health),'s: '+str(w.vikingArmy[i].strength)))
+        for i in range(vks,sxs):
+            cter+=1
+            print('%-12s %-25s %-15s %-12s %-10s %-10s' % ('Saxon '+str(cter),'h: '+str(w.saxonArmy[i].health),'s: '+str(w.saxonArmy[i].strength),'','',''))
+    else:
+        for i in range(sxs):
+            cter+=1
+            print('%-12s %-25s %-15s %-12s %-10s %-10s' % ('Saxon '+str(cter),'h: '+str(w.saxonArmy[i].health),'s: '+str(w.saxonArmy[i].strength),str(w.vikingArmy[i].name),'h: '+str(w.vikingArmy[i].health),'s: '+str(w.vikingArmy[i].strength)))
+        for i in range(sxs,vks):
+            cter+=1
+            print('%-12s %-25s %-15s %-12s %-10s %-10s' % ('','','',str(w.vikingArmy[i].name),'h: '+str(w.vikingArmy[i].health),'s: '+str(w.vikingArmy[i].strength)))
+
+
+
+
+
+
+    # BATTLE 2: ------------------------------------------------------------------------------------------------------------------
+
+
+
+    battle1=input("\nThe second battle is about to start.\
+                \nPress enter to roll a dice, the first attack will be yours if you get a nunber higher than 3.\n")
+    d2 = dice()
+    print('\n')
+
+    battle(d2)
+
+    if ch1 == '1' and w.showStatus() == 'Vikings have won the war of the century!' or ch1 == '2' and w.showStatus() == 'Saxons have fought for their lives and survive another day...':
+        print("\nYou won the second battle!\n")
+        time.sleep(2)
+        vict +=1
+    else:
+        print("\nYou lost the second battle..\n")
+        time.sleep(2)
+
+
+
+
+
+    # ENDING ---------------------------------------------------------------------------------------------------------------------
+
+
+
+    if vict == 2:
+        print(text[4])
+
+    elif vict == 1:
+        print(text[5])
+
+    elif vict == 0:
+        print(text[6])
+
+    else:
+        pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# PARA EL ARCHIVO DE TESTEO: ---------------------------------------------------------------------------------------------------------------
+
+
+else:
+
+
     try:
-        int(ready)
-        flag = False
+        ready = test[0]
+
+        flag = True
+        while flag:
+            try:
+                int(ready)
+                flag = False
+            except:
+                ready = test[-1]
+
+        if ready == '2': print("\n'WRARG!!! YOU SHOULD HAVE THOUGHT ABOUT THAT BEFORE'-- an angry viking shouts. \n")
+        else: pass
+
+
+
+        # QUESTIONS AND SIDE CHOICE: -----------------------------------------------------------------------------------------------------------
+
+
+        a = [test[e] for e in range(1,7)]
+        right_a = ['2','odin','3','2','1','1']
+
+        check = [str(a[i]).lower()==right_a[i] for i in range(len(a))]
+        vscore = sum(check[:3])
+        sxscore = sum(check[3:])
+
+        flag = True
+
+        while flag:
+                if vscore < sxscore: ch1 = '2'
+                elif vscore > sxscore: ch1 = '1'
+                else: ch1 = test[-2]
+                
+                if ch1 == '1': 
+                    print("\nvikingChief: 'WROARG! You will guide us to victory!'\n")
+                    print("\x1B[3m" + 'You correctly answered ' +str(vscore)+'/3 questions about your people, the Vikings.\
+                    \nIt will have an influence on their initial health and strength..\n' + "\x1B[0m")
+                    score = vscore
+                    flag = False
+                elif ch1 == '2': 
+                    print("\nsaxonsChief: 'We will bring you the glory, my lord.'\n")
+                    print("\x1B[3m" + 'You correctly answered ' +str(sxscore)+'/3 questions about your people, the Saxons.\
+                    \nIt will have an influence on their initial health and strength..\n' + "\x1B[0m")
+                    score = sxscore
+                    flag = False
+                else: 
+                    print('You must really choose a side now...')
+
+
+
+
+
+
+        # ARMY CREATION: ----------------------------------------------------------------------------------------------------------------------
+
+
+
+        attackrange = {0:30,1:50,2:80,3:100}
+        healthrange = {0:200,1:250,2:280,3:300}
+
+
+        cter=0
+
+        if ch1 == '1':
+
+            for i in range(30):
+                w.addViking(Viking(viking_names[i],random.choice(range(healthrange[score]-20,healthrange[score]+20)),random.choice(range(attackrange[score]-20,attackrange[score]))))
+                w.addSaxon(Saxon(healthrange[2],attackrange[2]))
+                
+            print('%20s %42s' % ('Your Army',"The enemys' Army"))
+            for i in range(30):
+                cter+=1
+                print('%-12s %-10s %-15s %-12s %-10s %-10s' % (str(w.vikingArmy[i].name),'h: '+str(w.vikingArmy[i].health),'s: '+str(w.vikingArmy[i].strength),'Saxon '+str(cter),'h: '+str(w.saxonArmy[i].health),'s: '+str(w.saxonArmy[i].strength)))
+
+        elif ch1 == '2':
+            
+            for i in range(30):
+                w.addViking(Viking(viking_names[i],healthrange[2],attackrange[2]))
+                w.addSaxon(Saxon(random.choice(range(healthrange[score]-20,healthrange[score]+20)),random.choice(range(attackrange[score]-20,attackrange[score]))))
+            
+            print('%20s %42s' % ('Your Army',"The enemys' Army"))
+            for i in range(30):
+                cter+=1
+                print('%-12s %-10s %-15s %-12s %-10s %-10s' % ('Saxon '+str(cter),'h: '+str(w.saxonArmy[i].health),'s: '+str(w.saxonArmy[i].strength),str(w.vikingArmy[i].name),'h: '+str(w.vikingArmy[i].health),'s: '+str(w.vikingArmy[i].strength)))
+
+        else:
+            pass
+
+
+
+
+
+        # BATTLE 1: ---------------------------------------------------------------------------------------------------------------------------
+
+
+        d1 = dicetest()
+        print('\n')
+
+        battletest(d1)
+
+        if ch1 == '1' and w.showStatus() == 'Vikings have won the war of the century!' or ch1 == '2' and w.showStatus() == 'Saxons have fought for their lives and survive another day...':
+            print(text[2])
+            vict = 1
+        else:
+            print(text[3])
+            vict = 0
+
+
+
+
+
+        # SECOND ARMY CREATION: ------------------------------------------------------------------------------------------------------------------
+
+
+        if ch1 == '1' and vict == 1 or ch1 == '2' and vict ==0:
+                
+            for i in range(random.choice(range(5,20))):
+                w.addSaxon(Saxon(random.choice(range(50,200)),random.choice(range(30,100))))
+
+        else:
+
+            for i in range(random.choice(range(5,20))):
+                w.addViking(Viking(random.choice(viking_names),random.choice(range(50,200)),random.choice(range(30,100))))
+
+        if ch1 == '2':
+            print('%20s %42s' % ('Your Army',"The enemys' Army"))
+
+        else:
+            print('%20s %52s' % ("The enemys' Army",'Your Army'))
+        vks = len(w.vikingArmy)
+        sxs = len(w.saxonArmy)
+
+        cter = 0
+        if vks < sxs:
+            for i in range(vks):
+                cter+=1
+                print('%-12s %-25s %-15s %-12s %-10s %-10s' % ('Saxon '+str(cter),'h: '+str(w.saxonArmy[i].health),'s: '+str(w.saxonArmy[i].strength),str(w.vikingArmy[i].name),'h: '+str(w.vikingArmy[i].health),'s: '+str(w.vikingArmy[i].strength)))
+            for i in range(vks,sxs):
+                cter+=1
+                print('%-12s %-25s %-15s %-12s %-10s %-10s' % ('Saxon '+str(cter),'h: '+str(w.saxonArmy[i].health),'s: '+str(w.saxonArmy[i].strength),'','',''))
+        else:
+            for i in range(sxs):
+                cter+=1
+                print('%-12s %-25s %-15s %-12s %-10s %-10s' % ('Saxon '+str(cter),'h: '+str(w.saxonArmy[i].health),'s: '+str(w.saxonArmy[i].strength),str(w.vikingArmy[i].name),'h: '+str(w.vikingArmy[i].health),'s: '+str(w.vikingArmy[i].strength)))
+            for i in range(sxs,vks):
+                cter+=1
+                print('%-12s %-25s %-15s %-12s %-10s %-10s' % ('','','',str(w.vikingArmy[i].name),'h: '+str(w.vikingArmy[i].health),'s: '+str(w.vikingArmy[i].strength)))
+
+
+
+
+
+
+        # BATTLE 2: ------------------------------------------------------------------------------------------------------------------
+
+
+
+        d2 = dicetest()
+        print('\n')
+
+        battletest(d2)
+
+        if ch1 == '1' and w.showStatus() == 'Vikings have won the war of the century!' or ch1 == '2' and w.showStatus() == 'Saxons have fought for their lives and survive another day...':
+            print("\nYou won the second battle!\n")
+            vict +=1
+        else:
+            print("\nYou lost the second battle..\n")
+
+
+
+
+
+        # ENDING ---------------------------------------------------------------------------------------------------------------------
+
+
+
+        if vict == 2:
+            print(text[4])
+
+        elif vict == 1:
+            print(text[5])
+
+        elif vict == 0:
+            print(text[6])
+
+        else:
+            pass
+
     except:
-        ready = input('Oups! It seems you fail to answer as indicated. Try again!')
 
-if ready == '2': print("\n'WRARG!!! YOU SHOULD HAVE THOUGHT ABOUT THAT BEFORE'-- an angry viking shouts. \n")
-else: pass
-
-
-
-
-
-# QUESTIONS AND SIDE CHOICE: -----------------------------------------------------------------------------------------------------------
-
-
-a = [input(e) for e in q]
-right_a = ['2','odin','3','2','1','1']
-
-check = [a[i].lower()==right_a[i] for i in range(len(a))]
-vscore = sum(check[:3])
-sxscore = sum(check[3:])
-
-flag = True
-
-while flag:
-        if vscore < sxscore: ch1 = '2'
-        elif vscore > sxscore: ch1 = '1'
-        else: ch1 = input('\nWOW! It seems you know the same about both cultures. You get to choose. \
-                          \nWhich army do you want to lead?:\n1: Vikings\n2: Saxons\n')
-        
-        if ch1 == '1': 
-            print("\nvikingChief: 'WROARG! You will guide us to victory!'\n")
-            print("\x1B[3m" + 'You correctly answered ' +str(vscore)+'/3 questions about your people, the Vikings.\
-            \nIt will have an influence on their initial health and strength..\n' + "\x1B[0m")
-            score = vscore
-            flag = False
-        elif ch1 == '2': 
-            print("\nsaxonsChief: 'We will bring you the glory, my lord.'\n")
-            print("\x1B[3m" + 'You correctly answered ' +str(sxscore)+'/3 questions about your people, the Saxons.\
-            \nIt will have an influence on their initial health and strength..\n' + "\x1B[0m")
-            score = sxscore
-            flag = False
-        else: 
-            print('You must really choose a side now...')
-
-
-
-
-
-
-# ARMY CREATION: ----------------------------------------------------------------------------------------------------------------------
-
-
-
-attackrange = {0:30,1:50,2:80,3:100}
-healthrange = {0:200,1:250,2:280,3:300}
-
-
-cter=0
-
-if ch1 == '1':
-
-    for i in range(30):
-        w.addViking(Viking(viking_names[i],random.choice(range(healthrange[score]-20,healthrange[score]+20)),random.choice(range(attackrange[score]-20,attackrange[score]))))
-        w.addSaxon(Saxon(healthrange[2],attackrange[2]))
-        
-    print('%20s %42s' % ('Your Army',"The enemys' Army"))
-    for i in range(30):
-        cter+=1
-        print('%-12s %-10s %-15s %-12s %-10s %-10s' % (str(w.vikingArmy[i].name),'h: '+str(w.vikingArmy[i].health),'s: '+str(w.vikingArmy[i].strength),'Saxon '+str(cter),'h: '+str(w.saxonArmy[i].health),'s: '+str(w.saxonArmy[i].strength)))
-
-elif ch1 == '2':
-    
-    for i in range(30):
-        w.addViking(Viking(viking_names[i],healthrange[2],attackrange[2]))
-        w.addSaxon(Saxon(random.choice(range(healthrange[score]-20,healthrange[score]+20)),random.choice(range(attackrange[score]-20,attackrange[score]))))
-    
-    print('%20s %42s' % ('Your Army',"The enemys' Army"))
-    for i in range(30):
-        cter+=1
-        print('%-12s %-10s %-15s %-12s %-10s %-10s' % ('Saxon '+str(cter),'h: '+str(w.saxonArmy[i].health),'s: '+str(w.saxonArmy[i].strength),str(w.vikingArmy[i].name),'h: '+str(w.vikingArmy[i].health),'s: '+str(w.vikingArmy[i].strength)))
-
-else:
-    pass
-
-
-
-
-
-# BATTLE 1: ---------------------------------------------------------------------------------------------------------------------------
-
-
-battle1=input("\nThe first battle is about to start.\
-              \nPress enter to roll a dice, the first attack will be yours if you get a nunber higher than 3.\n")
-d1 = dice()
-print('\n')
-
-battle(d1)
-
-if ch1 == '1' and w.showStatus() == 'Vikings have won the war of the century!' or ch1 == '2' and w.showStatus() == 'Saxons have fought for their lives and survive another day...':
-    ent2 = input(text[2])
-    vict = 1
-else:
-    ent2 = input(text[3])
-    vict = 0
-
-
-
-
-
-# SECOND ARMY CREATION: ------------------------------------------------------------------------------------------------------------------
-
-
-if ch1 == '1' and vict == 1 or ch1 == '2' and vict ==0:
-        
-    for i in range(random.choice(range(5,20))):
-        w.addSaxon(Saxon(random.choice(range(50,200)),random.choice(range(30,100))))
-
-else:
-
-    for i in range(random.choice(range(5,20))):
-        w.addViking(Viking(random.choice(viking_names),random.choice(range(50,200)),random.choice(range(30,100))))
-
-if ch1 == '2':
-    print('%20s %42s' % ('Your Army',"The enemys' Army"))
-
-else:
-    print('%20s %52s' % ("The enemys' Army",'Your Army'))
-vks = len(w.vikingArmy)
-sxs = len(w.saxonArmy)
-
-cter = 0
-if vks < sxs:
-    for i in range(vks):
-        cter+=1
-        print('%-12s %-25s %-15s %-12s %-10s %-10s' % ('Saxon '+str(cter),'h: '+str(w.saxonArmy[i].health),'s: '+str(w.saxonArmy[i].strength),str(w.vikingArmy[i].name),'h: '+str(w.vikingArmy[i].health),'s: '+str(w.vikingArmy[i].strength)))
-    for i in range(vks,sxs):
-        cter+=1
-        print('%-12s %-25s %-15s %-12s %-10s %-10s' % ('Saxon '+str(cter),'h: '+str(w.saxonArmy[i].health),'s: '+str(w.saxonArmy[i].strength),'','',''))
-else:
-    for i in range(sxs):
-        cter+=1
-        print('%-12s %-25s %-15s %-12s %-10s %-10s' % ('Saxon '+str(cter),'h: '+str(w.saxonArmy[i].health),'s: '+str(w.saxonArmy[i].strength),str(w.vikingArmy[i].name),'h: '+str(w.vikingArmy[i].health),'s: '+str(w.vikingArmy[i].strength)))
-    for i in range(sxs,vks):
-        cter+=1
-        print('%-12s %-25s %-15s %-12s %-10s %-10s' % ('','','',str(w.vikingArmy[i].name),'h: '+str(w.vikingArmy[i].health),'s: '+str(w.vikingArmy[i].strength)))
-
-
-
-
-
-
-# BATTLE 2: ------------------------------------------------------------------------------------------------------------------
-
-
-
-battle1=input("\nThe second battle is about to start.\
-              \nPress enter to roll a dice, the first attack will be yours if you get a nunber higher than 3.\n")
-d2 = dice()
-print('\n')
-
-battle(d2)
-
-if ch1 == '1' and w.showStatus() == 'Vikings have won the war of the century!' or ch1 == '2' and w.showStatus() == 'Saxons have fought for their lives and survive another day...':
-    print("\nYou won the second battle!\n")
-    time.sleep(2)
-    vict +=1
-else:
-    print("\nYou lost the second battle..\n")
-    time.sleep(2)
-
-
-
-
-
-# ENDING ---------------------------------------------------------------------------------------------------------------------
-
-
-
-if vict == 2:
-    print(text[4])
-
-elif vict == 1:
-    print(text[5])
-
-elif vict == 0:
-    print(text[6])
+        errorcount += 1
